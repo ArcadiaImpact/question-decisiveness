@@ -32,10 +32,15 @@ elicit from a real model.
 
 ## Install
 
+Using [uv](https://docs.astral.sh/uv/):
+
 ```bash
-pip install -e .            # metric only (numpy)
-pip install -e ".[model]"   # + torch/transformers for elicitation & fitting
+uv pip install -e .            # metric only (numpy)
+uv pip install -e ".[model]"   # + torch/transformers for elicitation & fitting
 ```
+
+Or add it to a project: `uv add question-decisiveness` (with the `model` extra,
+`uv add "question-decisiveness[model]"`).
 
 ## Use
 
@@ -61,9 +66,9 @@ If you already have `mu` (or just a preference matrix), skip straight to the
 metric — see `examples/offline_demo.py` (no model, no torch).
 
 ```bash
-python examples/offline_demo.py     # numpy only
-python examples/run_model.py        # downloads a small HF model
-pytest                              # tests (fit test auto-skips without torch)
+uv run examples/offline_demo.py     # numpy only
+uv run examples/run_model.py        # downloads a small HF model
+uv run pytest                       # tests (fit test auto-skips without torch)
 ```
 
 ## The two metric forms
