@@ -1,0 +1,19 @@
+[project]
+name = "question-decisiveness"
+version = "0.1.0"
+description = "Measure how opinionated an LM is over a set of options, from forced-choice logprobs."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = ["numpy"]
+
+[project.optional-dependencies]
+# Needed only to fit utilities (fit_caseV_mle) and to elicit from a real model.
+model = ["torch", "transformers"]
+dev = ["pytest", "torch"]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["question_decisiveness"]
