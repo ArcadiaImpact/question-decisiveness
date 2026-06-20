@@ -7,8 +7,10 @@ requires-python = ">=3.9"
 dependencies = ["numpy"]
 
 [project.optional-dependencies]
-# Needed only to fit utilities (fit_caseV_mle) and to elicit from a real model.
-model = ["torch", "transformers"]
+# Needed only to fit utilities (fit_caseV_mle) and to elicit from a local model.
+model = ["torch", "transformers", "accelerate"]
+# Elicit from a hosted model over the OpenRouter API (the fit still needs torch).
+openrouter = ["openai", "torch"]
 dev = ["pytest", "torch"]
 
 [build-system]

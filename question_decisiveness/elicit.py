@@ -28,9 +28,9 @@ from .prompts import ASSISTANT_PREFIX, build_prompt
 def load_model(model_id: str, dtype: str = "bfloat16", revision: str | None = None):
     """Load a causal LM + tokenizer for left-padded batched forced-choice reads.
 
-    The original project also supports 4/8-bit quantization and multi-GPU
-    sharding; this is the trimmed single-/multi-GPU bf16 path. ``device_map="auto"``
-    keeps everything on cuda:0 on a single GPU and shards larger models if needed.
+    This is the bf16 path. ``device_map="auto"`` (which needs `accelerate`) shards
+    larger models across GPUs and keeps everything on cuda:0 on a single GPU; when
+    `accelerate` isn't installed it falls back to loading on one device.
     """
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -41,10 +41,22 @@ def load_model(model_id: str, dtype: str = "bfloat16", revision: str | None = No
     if tok.pad_token_id is None:
         tok.pad_token = tok.eos_token
 
-    kwargs = {"torch_dtype": getattr(torch, dtype), "device_map": "auto"}
-    if revision:
-        kwargs["revision"] = revision
-    model = AutoModelForCausalLM.from_pretrained(model_id, **kwargs)
+    dtype_t = getattr(torch, dtype)
+    kwargs = {"revision": revision} if revision else {}
+    try:
+        import accelerate  # noqa: F401
+        kwargs["device_map"] = "auto"
+    except ImportError:
+        pass
+
+    # transformers renamed `torch_dtype` -> `dtype`; support both across versions.
+    try:
+        model = AutoModelForCausalLM.from_pretrained(model_id, dtype=dtype_t, **kwargs)
+    except TypeError:
+        model = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=dtype_t, **kwargs)
+
+    if "device_map" not in kwargs:
+        model.to("cuda" if torch.cuda.is_available() else "cpu")
     model.eval()
     return tok, model
 

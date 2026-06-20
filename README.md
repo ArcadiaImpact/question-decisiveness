@@ -35,11 +35,12 @@ elicit from a real model.
 Using [uv](https://docs.astral.sh/uv/):
 
 ```bash
-uv pip install -e .            # metric only (numpy)
-uv pip install -e ".[model]"   # + torch/transformers for elicitation & fitting
+uv pip install -e .                 # metric only (numpy)
+uv pip install -e ".[model]"        # + torch/transformers, elicit from a local model
+uv pip install -e ".[openrouter]"   # + openai/torch, elicit from a hosted model
 ```
 
-Or add it to a project: `uv add question-decisiveness` (with the `model` extra,
+Or add it to a project: `uv add question-decisiveness` (with an extra,
 `uv add "question-decisiveness[model]"`).
 
 ## Use
@@ -62,12 +63,24 @@ mu      = fit_caseV_mle(pref_to_edges(pref), n=len(items))["mu"]
 print(decisiveness(mu))   # e.g. 0.71
 ```
 
+No GPU? Read the same A/B preferences from a **hosted** model's token logprobs
+over the OpenRouter API instead — see `examples/run_openrouter.py`:
+
+```bash
+export OPENROUTER_API_KEY=sk-or-...
+uv run examples/run_openrouter.py openai/gpt-4o-mini
+```
+
+(The model must expose `logprobs`/`top_logprobs` through OpenRouter — most OpenAI
+and Llama models do.)
+
 If you already have `mu` (or just a preference matrix), skip straight to the
 metric — see `examples/offline_demo.py` (no model, no torch).
 
 ```bash
 uv run examples/offline_demo.py     # numpy only
 uv run examples/run_model.py        # downloads a small HF model
+uv run examples/run_openrouter.py   # hosted model via OpenRouter (needs API key)
 uv run pytest                       # tests (fit test auto-skips without torch)
 ```
 
